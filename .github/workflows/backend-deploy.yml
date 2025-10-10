@@ -1,4 +1,4 @@
-name: Deploy Backend to Azure
+name: Deploy Backend (Node.js) to Azure
 
 on:
   push:
@@ -12,21 +12,27 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout code
+      - name: Checkout repository
         uses: actions/checkout@v3
 
       - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: '18'
+          node-version: 18
 
       - name: Install dependencies
         working-directory: backend
-        run: npm install
+        run: npm ci
 
+      # Optional: if you have a build step (like TypeScript compilation)
       - name: Build project
         working-directory: backend
-        run: npm run build
+        run: |
+          if [ -f package.json ] && grep -q "\"build\"" package.json; then
+            npm run build
+          else
+            echo "No build script found, skipping build step"
+          fi
 
       - name: Deploy to Azure Web App
         uses: azure/webapps-deploy@v2
